@@ -54,6 +54,9 @@
  * Damian Wrobel <dwrobel@ertelnet.rybnik.pl>                                  *
  * 29-04-2019 v3.4.2 Implement update() method.                                *
  *                                                                             *
+ * Scott Smith                                                                 *
+ * 28-06-2019 v3.4.3 add support for SoftwareWire library                      *
+ *                                                                             *
  * External EEPROM Library by Jack Christensen is licensed under CC BY-SA 4.0, *
  * http://creativecommons.org/licenses/by-sa/4.0/                              *
  *-----------------------------------------------------------------------------*/
@@ -62,7 +65,10 @@
 #define extEEPROM_h
 
 #include <Arduino.h>
-#include <Wire.h>
+
+// use SoftwareWire instead of Wire
+#include <SoftwareWire.h>
+//   #include <Wire.h>
 
 //EEPROM size in kilobits. EEPROM part numbers are usually designated in k-bits.
 enum eeprom_size_t {
@@ -86,7 +92,9 @@ class extEEPROM
 {
     private: 
         // the private attribute used to comunicate with the correct I2C SERCOM
-    TwoWire *communication; 
+// use SoftwareWire instead of Wire
+	SoftwareWire *communication;
+// 	TwoWire *communication;
 
     public:
         //I2C clock frequencies
@@ -94,7 +102,9 @@ class extEEPROM
         extEEPROM(eeprom_size_t deviceCapacity, byte nDevice, unsigned int pageSize, byte eepromAddr = 0x50);
 
         // It is ready for every I2C Sercom, by default use the main Wire
-        byte begin(twiClockFreq_t twiFreq = twiClock100kHz, TwoWire *_comm=&Wire); 
+        // use SoftwareWire instead of TwoWire (default main Wire fails but fills a requirement)
+        byte begin(twiClockFreq_t twiFreq = twiClock100kHz, SoftwareWire *_comm=&Wire); 
+//         byte begin(twiClockFreq_t twiFreq = twiClock100kHz, TwoWire *_comm=&Wire); 
         
         byte write(unsigned long addr, const byte *values, unsigned int nBytes);
         byte write(unsigned long addr, byte value);

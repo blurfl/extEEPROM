@@ -2,6 +2,8 @@
 
 Original library by http://github.com/JChristensen/extEEPROM
 
+Modified to work with SoftwareWire
+
 ## Introduction ##
 **Arduino External EEPROM Library**
 
@@ -34,26 +36,37 @@ Note that the Arduino Wire library has a buffer size of 32 bytes. This limits th
 - The library manager will open and you will find a list of libraries that are already installed or ready for installation. Scroll the list to find **extEEPROM** library and click on it.
  - Select the version of the library you want to install.
  - Click on install and wait for the IDE to install the new library. Downloading may take time depending on your connection speed.
- - Once it has finished, an Installed tag should appear, You can close the library manager.
+ - Once it has finished, an Installed tag should appear.
+ - The **SoftwareWire** library will need to be installed as well. 
+ - With both installed, you can close the library manager
 
 ### Manual Install
 - Go to http://github.com/PaoloP74/extEEPROM, click the **Download ZIP** button and save the ZIP file to a convenient location on your PC.
 - Uncompress the downloaded file.  This will result in a folder containing all the files for the library, that has a name that includes the branch name, usually **extEEPROM-master**.
 - Rename the folder to just **extEEPROM**.
 - Copy the renamed folder to the Arduino sketchbook\libraries folder.
+- The **SoftwareWire** library can be downloaded in a similar manner from https://github.com/Testato/SoftwareWire
 
 ## Examples ##
 The following example sketch is included with the **extEEPROM Library**:
 - **eepromReadWrite**
 - **eepromTest:** Writes 32-bit integers to the entire EEPROM address space, starting at address 0 and continuing to the topmost address. These are then read back in and verified; any discrepancies are reported to the serial monitor.
 - **eepromTest_Wire1**
+- **eepromTest_Update** Tests the update() function.
+
 ## Usage notes ##
 The **extEEPROM Library** is designed for use with Arduino version 1.0 or later.
 
-To use the **extEEPROM Library**, the standard [Arduino Wire library](http://arduino.cc/en/Reference/Wire) must also be included.  For brevity, this include is not repeated in the examples below:
+To use the **extEEPROM Library** with non-hardware I2C connections, the **SoftwareWire** library must also be included, and the gpio pins to be used for SDA and SCL defined:  
 ```c++
-#include <Wire.h>         //http://arduino.cc/en/Reference/Wire (included with Arduino IDE)
+#include <SoftwareWire.h>
+uint8_t sdaPin = 36;                  // edit pin definitions to suit the project
+uint8_t sclPin = 37;                  //
+SoftwareWire myWire(sdaPin, sclPin);  //
 ```
+
+The snippets below have changed to reflect using the **SoftwareWire** library, also take a look at the example sketches which have all been updated.
+
 ## Enumerations ##
 ### eeprom_size_t
 ##### Description
@@ -95,18 +108,18 @@ extEEPROM oddEEPROM(kbits_8, 1, 16, 0x42);		//an EEPROM with a non-standard I2C 
 ```
 
 ## Methods ##
-### begin(twiClockFreq_t freq, TwoWire *_comm)
+### begin(twiClockFreq_t freq, SoftwareWire *_comm)
 ##### Description
 Initializes the library. Call this method once in the setup code. begin() does a dummy I/O so that the user may interrogate the return status to ensure the EEPROM is operational.
 ##### Syntax
-`myEEPROM.begin(twiClockFreq_t freq);`
+`myEEPROM.begin(twiClockFreq_t freq, &myWire);`
 or
-`myEEPROM.begin(twiClockFreq_t freq, TwoWire *_comm);`
+`myEEPROM.begin(twiClockFreq_t freq, SoftwareWire *_comm);`
 ##### Parameters
 **freq** *(twiClockFreq_t)*: The desired I2C bus speed, `extEEPROM::twiClock100kHz` or `extEEPROM::twiClock400kHz`. Can be omitted in which case it will default to `twiClock100kHz`.
 **NOTE:** When using 400kHz, if there are other devices on the bus they must all support a 400kHz bus speed. **Secondly**, the other devices should be initialized first, as other libraries may not support adjusting the bus speed. To ensure the desired speed is set, call the extEEPROM.begin() function *after* initializing all other I2C devices.
 
-**_comm** *(TwoWire * )*: The Used I2C TwoWire channel . Can be omitted in which case it will default to the first Arduino I2C channel `Wire`.  If another of the possible I2C channel is used its pointer shall be passed as parameter.
+**_comm** *(SoftwareWire * )*: The Used I2C SoftwareWire channel . <strike>Can be omitted in which case it will default to the first Arduino I2C channel `Wire`.</strike>  The SoftwareWire I2C channel pointer shall be passed as parameter.
 **NOTE:** If another I2C channel is unse, and not the default one, the first parameters **freq** MUST be defined.
 ##### Returns
 I2C I/O status, zero if successful *(byte)*. See the [Arduino Wire.endTransmission() function](http://arduino.cc/en/Reference/WireEndTransmission) for a description of other return codes.
@@ -119,10 +132,10 @@ if ( i2cStat != 0 ) {
 	//there was a problem
 }
 ```
-##### Use of other I2C channel
+##### Use of other I2C channel (see example sketch *eepromTest_Wire1.ino*_)
 ```c++
 extEEPROM myEEPROM(kbits_256, 2, 64);
-byte i2cStat = myEEPROM.begin(extEEPROM::twiClock400kHz, &Wire1);
+byte i2cStat = myEEPROM.begin(extEEPROM::twiClock400kHz, &myWire1);
 if ( i2cStat != 0 ) {
 	//there was a problem
 }

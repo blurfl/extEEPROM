@@ -4,6 +4,16 @@
 //so the sketch doesn't do unnecessary EEPROM writes every time it's reset.
 //Jack Christensen 09Jul2014
 //Paolo Paolucci 17Mar2016 (fix 28Jun2017)
+// adapted for SoftwareWire by Scott Smith 29-06-2019
+
+
+// add SoftwareWire library and declare software I2C pins ...
+#include <SoftwareWire.h>
+uint8_t sdaPin = 36; // edit to suit the project
+uint8_t sclPin = 37; //
+SoftwareWire myWire(sdaPin, sclPin);  //
+
+
 
 #include <extEEPROM.h>    //https://github.com/PaoloP74/extEEPROM
 
@@ -17,7 +27,10 @@ void setup(void)
 {
   pinMode(btnStart, INPUT_PULLUP);
   Serial.begin(115200);
-  uint8_t eepStatus = eep.begin(eep.twiClock400kHz);   //go fast!
+//
+// change begin() to call SoftwareWire
+  uint8_t eepStatus = eep.begin(eep.twiClock400kHz, &myWire);   //go fast!
+//  uint8_t eepStatus = eep.begin(eep.twiClock400kHz);   //go fast!
   if (eepStatus) {
     Serial.print(F("extEEPROM.begin() failed, status = "));
     Serial.println(eepStatus);

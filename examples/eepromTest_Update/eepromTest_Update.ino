@@ -1,7 +1,15 @@
 // Test extEEPROM library - update() method.
 // Damian Wrobel <dwrobel@ertelnet.rybnik.pl>
+// adapted for SoftwareWire by Scott Smith 29-06-2019
 
 #include <extEEPROM.h>
+
+// add SoftwareWire library and declare software I2C pins ...
+#include <SoftwareWire.h>
+uint8_t sdaPin = 36; // edit to suit the project
+uint8_t sclPin = 37; //
+SoftwareWire myWire(sdaPin, sclPin);  //
+
 
 extEEPROM ep(kbits_256, 1, 64); // device size, number of devices, page size
 
@@ -69,7 +77,9 @@ void test_update() {
 void setup(void) {
   Serial.begin(115200);
 
-  const auto eepStatus = ep.begin(ep.twiClock100kHz);
+// change begin() call to call SoftwareWire
+  const auto eepStatus = ep.begin(ep.twiClock100kHz, &myWire);
+//  const auto eepStatus = ep.begin(ep.twiClock100kHz);
   if (eepStatus) {
     Serial.print("extEEPROM.begin() failed, status = ");
     Serial.println(eepStatus);

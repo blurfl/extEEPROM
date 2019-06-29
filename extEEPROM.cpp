@@ -51,6 +51,9 @@
  * Paolo Paolucci 22-10-2015 v3.1											   *
  * 09-01-2016 v3.2 Add update function.										   *
  *                                                                             *
+ * Scott Smith                                                                 *
+ * 28-06-2019 v3.4.3 add support for SoftwareWire library                      *
+ *                                                                             *
  * External EEPROM Library by Jack Christensen is licensed under CC BY-SA 4.0, *
  * http://creativecommons.org/licenses/by-sa/4.0/                              *
  *-----------------------------------------------------------------------------*/
@@ -99,7 +102,10 @@ extEEPROM::extEEPROM(eeprom_size_t deviceCapacity, byte nDevice, unsigned int pa
 //when using a 400kHz bus speed and there are multiple I2C devices on the
 //bus (other than EEPROM), call extEEPROM::begin() after any initialization
 //calls for the other devices to ensure the intended I2C clock speed is set.
-byte extEEPROM::begin(twiClockFreq_t twiFreq, TwoWire *_comm)
+//
+// change begin() to call SoftwareWire
+	byte extEEPROM::begin(twiClockFreq_t twiFreq, SoftwareWire *_comm)
+// 	byte extEEPROM::begin(twiClockFreq_t twiFreq, TwoWire *_comm)
 {
     communication = _comm;
     communication->begin();

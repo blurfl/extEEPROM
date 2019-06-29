@@ -16,29 +16,41 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110 - 1301  USA
 */
 
+// Scott Smith 28-06-2019 v3.4.3 add support for SoftwareWire library
+
 #include "extEEPROM.h"
 
-extEEPROM myEEPROM(kbits_256, 1, 64, 0x57);
+uint8_t i2cAddr = 0x50; // 0x57 in original example?
+extEEPROM myEEPROM(kbits_256, 1, 64, i2cAddr);
+
+// add SoftwareWire library and declare software I2C pins ...
+#include <SoftwareWire.h>
+uint8_t sdaPin = 36; // edit to suit the project
+uint8_t sclPin = 37; //
+SoftwareWire myWire(sdaPin, sclPin);  //
 
 void setup(void)
 {
-  SerialUSB.begin(115200);
-  while (!SerialUSB) {
+  Serial.begin(115200);
+  while (!Serial) {
     ;
   }
 
-  byte i2cStat = myEEPROM.begin(myEEPROM.twiClock100kHz);
+// change begin() to call SoftwareWire
+  byte i2cStat = myEEPROM.begin(myEEPROM.twiClock100kHz, &myWire);
+//  byte i2cStat = myEEPROM.begin(myEEPROM.twiClock100kHz);
+
   if ( i2cStat != 0 ) {
-    SerialUSB.println(F("I2C Problem"));
+    Serial.println(F("I2C Problem"));
   }
 
-  SerialUSB.println(F("EEPROM Memory commands:  read:(a)(l)(r) , write:(a)(d)(w), next read data (n)"));
-  SerialUSB.println(F("- Commands TO PRESS:"));
-  SerialUSB.println(F("\t a : memory address to read / write"));
-  SerialUSB.println(F("\t d : data to write"));
-  SerialUSB.println(F("\t l : data to write"));
-  SerialUSB.println(F("\t r : read command"));
-  SerialUSB.println(F("\t w : write command"));
+  Serial.println(F("EEPROM Memory commands:  read:(a)(l)(r) , write:(a)(d)(w), next read data (n)"));
+  Serial.println(F("- Commands TO PRESS:"));
+  Serial.println(F("\t a : memory address to read / write"));
+  Serial.println(F("\t d : data to write"));
+  Serial.println(F("\t l : data to write"));
+  Serial.println(F("\t r : read command"));
+  Serial.println(F("\t w : write command"));
 }
 
 unsigned long address = 0;
@@ -58,13 +70,13 @@ void eprom_read_write(bool write)
   }
   if ( i2cStat != 0 ) {
     //there was a problem
-    SerialUSB.print(F("I2C Problem: "));
+    Serial.print(F("I2C Problem: "));
     if ( i2cStat == EEPROM_ADDR_ERR) {
-      SerialUSB.println(F("Wrong address"));
+      Serial.println(F("Wrong address"));
     } else {
-      SerialUSB.print(F("I2C error: "));
-      SerialUSB.print(i2cStat);
-      SerialUSB.println(F(""));
+      Serial.print(F("I2C error: "));
+      Serial.print(i2cStat);
+      Serial.println(F(""));
     }
   }
 }
@@ -80,12 +92,12 @@ void parse(char inChar)
 
   switch (inChar) {
     case 'a':
-      SerialUSB.print(F("Insert Address as 4 Hex chars (without '0x'):  "));
+      Serial.print(F("Insert Address as 4 Hex chars (without '0x'):  "));
 
       while (i < 4) {
-        while (SerialUSB.available() <= 0)
+        while (Serial.available() <= 0)
           ;
-        inc = SerialUSB.read();
+        inc = Serial.read();
 
         if (inc == 'q')
           return;
@@ -94,16 +106,16 @@ void parse(char inChar)
         ++i;
       }
       address = (unsigned long)strtol(addr_char, NULL, 16);
-      SerialUSB.println(address);
+      Serial.println(address);
       break;
 
     case 'd':
-      SerialUSB.print(F("Insert Hex data sequence (without '0x'), return to enter: "));
+      Serial.print(F("Insert Hex data sequence (without '0x'), return to enter: "));
       memset(data, 0, maxDataSize);
       while (true) {
-        while (SerialUSB.available() <= 0)
+        while (Serial.available() <= 0)
           ;
-        inc = SerialUSB.read();
+        inc = Serial.read();
         if (inc == 'q')
           return;
         if (inc == '\r' || inc == '\n')
@@ -125,15 +137,15 @@ void parse(char inChar)
         i++;
       }
       dataSize = j;
-      SerialUSB.println(dataSize);
-      SerialUSB.println(F(""));
+      Serial.println(dataSize);
+      Serial.println(F(""));
       break;
     case 'l':
-      SerialUSB.print(F("Insert data len as 2 Hex chars (without '0x'): "));
+      Serial.print(F("Insert data len as 2 Hex chars (without '0x'): "));
       while (i < 2) {
-        while (SerialUSB.available() <= 0)
+        while (Serial.available() <= 0)
           ;
-        inc = SerialUSB.read();
+        inc = Serial.read();
         if (inc == 'q')
           return;
 
@@ -145,7 +157,7 @@ void parse(char inChar)
       }
 
       dataSize = (unsigned int)strtol(size_char, NULL, 16);
-      SerialUSB.println(dataSize);
+      Serial.println(dataSize);
       break;
 
 
@@ -153,33 +165,33 @@ void parse(char inChar)
       address += dataSize;
     /* FALLTHROUGH */
     case 'r':
-      SerialUSB.print(F("reading address: "));
-      SerialUSB.println(address, HEX);
+      Serial.print(F("reading address: "));
+      Serial.println(address, HEX);
 
       eprom_read_write(false);
       for (i = 0; i < dataSize ; ++i) {
-        SerialUSB.print(data[i], HEX);
-        SerialUSB.print(F(" "));
+        Serial.print(data[i], HEX);
+        Serial.print(F(" "));
       }
-      SerialUSB.println();
+      Serial.println();
 
       break;
 
     case 'w':
-      SerialUSB.print(F("writing at address: "));
-      SerialUSB.print(address, HEX);
-      SerialUSB.print(F(", len: "));
-      SerialUSB.println(address, dataSize);
+      Serial.print(F("writing at address: "));
+      Serial.print(address, HEX);
+      Serial.print(F(", len: "));
+      Serial.println(address, dataSize);
       for (i = 0; i < dataSize ; ++i) {
-        SerialUSB.print(data[i], HEX);
-        SerialUSB.print(F(" "));
+        Serial.print(data[i], HEX);
+        Serial.print(F(" "));
       }
       eprom_read_write(true);
-      SerialUSB.println();
+      Serial.println();
 
       break;
     case 'T':
-      SerialUSB.println(F("Memory test: writing and verifying the whole memory"));
+      Serial.println(F("Memory test: writing and verifying the whole memory"));
       break;
 
     default:
@@ -190,9 +202,9 @@ void parse(char inChar)
 
 void loop(void)
 {
-  if (SerialUSB.available() > 0) {
-    char inChar = SerialUSB.read();
-    SerialUSB.print(inChar);
+  if (Serial.available() > 0) {
+    char inChar = Serial.read();
+    Serial.print(inChar);
     parse(inChar);
   }
 
