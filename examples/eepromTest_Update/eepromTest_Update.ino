@@ -29,6 +29,8 @@ void test_update() {
   if (rv) {
     Serial.print("(1) Error updating: ");
     Serial.println(rv);
+  } else {
+    Serial.println("(1)  update step complete ");
   }
 
   byte readBuf[length];
@@ -40,13 +42,19 @@ void test_update() {
   if (rv) {
     Serial.print("(2) Error reading: ");
     Serial.println(rv);
+  } else {
+    Serial.println("(2)  read step complete ");
   }
+
 
   rv = memcmp(writeBuf, readBuf, length);
   if (rv) {
     Serial.print("(3) Error comparing: ");
     Serial.println(rv);
+  } else {
+    Serial.println("(3)  compare step complete ");
   }
+
 
   for (auto i = 0; i < length; i++) {
     if (i % 2 || i % 3)
@@ -57,19 +65,28 @@ void test_update() {
   if (rv) {
     Serial.print("(4) Error updating: ");
     Serial.println(rv);
+  } else {
+    Serial.println("(4)  update step complete ");
   }
+
 
   rv = ep.read(addr, readBuf, length);
   if (rv) {
     Serial.print("(5) Error reading: ");
     Serial.println(rv);
+  } else {
+    Serial.println("(5)  read step complete ");
   }
+
 
   rv = memcmp(writeBuf, readBuf, length);
   if (rv) {
     Serial.print("(6) Error comparing: ");
     Serial.println(rv);
+  } else {
+    Serial.println("(6)  compare step complete ");
   }
+
 
   Serial.println("(7) Test OK");
 }
