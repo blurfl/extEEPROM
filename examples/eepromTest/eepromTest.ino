@@ -4,7 +4,8 @@
 //so the sketch doesn't do unnecessary EEPROM writes every time it's reset.
 //Jack Christensen 09Jul2014
 //Paolo Paolucci 17Mar2016 (fix 28Jun2017)
-// adapted for SoftwareWire by Scott Smith 29-06-2019
+// adapted for SoftwareWire by Scott Smith 29-06-2019 --
+// use Serial character receive instead of pushbutton to start test
 
 
 // add SoftwareWire library and declare software I2C pins ...
@@ -37,8 +38,8 @@ void setup(void)
     while (1);
   }
 
-  Serial.println(F("Press button to start..."));
-  while (digitalRead(btnStart) == HIGH) delay(10);    //wait for button push
+  Serial.println(F("Send a character to start..."));
+  while (!Serial.available()) delay(10);    //wait for Serial character
 
   uint8_t chunkSize = 64;    //this can be changed, but must be a multiple of 4 since we're writing 32-bit integers
   //    eeErase(chunkSize, 0, totalKBytes * 1024 - 1);
