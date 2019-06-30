@@ -30,7 +30,7 @@ void test_update() {
     Serial.print("(1) Error updating: ");
     Serial.println(rv);
   } else {
-    Serial.println("(1)  update step complete ");
+    Serial.println("(1) update step complete ");
   }
 
   byte readBuf[length];
@@ -43,7 +43,7 @@ void test_update() {
     Serial.print("(2) Error reading: ");
     Serial.println(rv);
   } else {
-    Serial.println("(2)  read step complete ");
+    Serial.println("(2) read step complete ");
   }
 
 
@@ -52,7 +52,7 @@ void test_update() {
     Serial.print("(3) Error comparing: ");
     Serial.println(rv);
   } else {
-    Serial.println("(3)  compare step complete ");
+    Serial.println("(3) compare step complete ");
   }
 
 
@@ -66,7 +66,7 @@ void test_update() {
     Serial.print("(4) Error updating: ");
     Serial.println(rv);
   } else {
-    Serial.println("(4)  update step complete ");
+    Serial.println("(4) update step complete ");
   }
 
 
@@ -75,7 +75,7 @@ void test_update() {
     Serial.print("(5) Error reading: ");
     Serial.println(rv);
   } else {
-    Serial.println("(5)  read step complete ");
+    Serial.println("(5) read step complete ");
   }
 
 
@@ -84,7 +84,7 @@ void test_update() {
     Serial.print("(6) Error comparing: ");
     Serial.println(rv);
   } else {
-    Serial.println("(6)  compare step complete ");
+    Serial.println("(6) compare step complete ");
   }
 
 
